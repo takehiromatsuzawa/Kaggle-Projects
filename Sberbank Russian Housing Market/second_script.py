@@ -1,6 +1,21 @@
-# See notebook
-#   https://www.kaggle.com/aharless/probabilistic-version-of-small-improvements/notebook
-# for some explanation of small improvements
+################################################################################################
+################################################################################################
+################################################################################################
+# Mostly a lot of silliness at this point:
+#   First model is modified from Reynaldo's script with a linear transformation of y_train
+#      that happens to fit the public test data well
+#      and may also fit the private test data well
+#      if it reflects a macro effect
+#      but almost certainly won't generalize to later data
+#   Second model is modified from Bruno do Amaral's early entry but
+#      with an outlier that I deleted early in the competition
+#   Third model is based on a legitimate data cleaning,
+#      but there's also a small transformation applied ot the predictions,
+#      so also probably not generalizable),
+################################################################################################
+################################################################################################
+################################################################################################
+
 
 # Parameters
 prediction_stderr = 0.02  #  assumed standard error of predictions
@@ -141,7 +156,7 @@ test['room_size'] = test['life_sq'] / test['num_room'].astype(float)
 
 # Aggreagte house price data derived from 
 # http://www.globalpropertyguide.com/real-estate-house-prices/R#russia
-# by luckyzhou
+# by luckyzhou on kaggle
 # See https://www.kaggle.com/luckyzhou/lzhou-test/comments
 
 rate_2015_q2 = 1
@@ -153,8 +168,8 @@ rate_2014_q1 = rate_2014_q2 / 1.0126
 rate_2013_q4 = rate_2014_q1 / 0.9902
 rate_2013_q3 = rate_2013_q4 / 1.0041
 rate_2013_q2 = rate_2013_q3 / 1.0044
-rate_2013_q1 = rate_2013_q2 / 1.0104  # This is 1.002 (relative to mult), close to 1:
-rate_2012_q4 = rate_2013_q1 / 0.9832  #     maybe use 2013q1 as a base quarter and get rid of mult?
+rate_2013_q1 = rate_2013_q2 / 1.0104  
+rate_2012_q4 = rate_2013_q1 / 0.9832  
 rate_2012_q3 = rate_2012_q4 / 1.0277
 rate_2012_q2 = rate_2012_q3 / 1.0279
 rate_2012_q1 = rate_2012_q2 / 1.0279
@@ -233,15 +248,15 @@ train['price_doc'] = train['price_doc'] * train['average_q_price']
 
 
 #########################################################################################################
-
+#########################################################################################################
 mult = 1.054880504
 train['price_doc'] = train['price_doc'] * mult
 y_train = train["price_doc"]
 
 #########################################################################################################
+#########################################################################################################
 
 x_train = train.drop(["id", "timestamp", "price_doc", "average_q_price"], axis=1)
-#x_test = test.drop(["id", "timestamp", "average_q_price"], axis=1)
 x_test = test.drop(["id", "timestamp"], axis=1)
 
 num_train = len(x_train)
@@ -270,7 +285,7 @@ xgb_params = {
 dtrain = xgb.DMatrix(x_train, y_train)
 dtest = xgb.DMatrix(x_test)
 
-
+# CV output shows this number of rounds is the best
 num_boost_rounds = 422
 model = xgb.train(dict(xgb_params, silent=0), dtrain, num_boost_round=num_boost_rounds)
 
@@ -316,7 +331,8 @@ xgb_params = {
 dtrain = xgb.DMatrix(x_train, y_train)
 dtest = xgb.DMatrix(x_test)
 
-num_boost_rounds = 385  # This was the CV output, as earlier version shows
+# CV output shows this number of rounds is the best
+num_boost_rounds = 385  
 model = xgb.train(dict(xgb_params, silent=0), dtrain, num_boost_round= num_boost_rounds)
 
 y_predict = model.predict(dtest)
@@ -439,7 +455,8 @@ xgb_params = {
 dtrain = xgb.DMatrix(X_train, y_train, feature_names=df_columns)
 dtest = xgb.DMatrix(X_test, feature_names=df_columns)
 
-num_boost_rounds = 420  # From Bruno's original CV, I think
+# CV output shows this number of rounds is the best
+num_boost_rounds = 420  
 model = xgb.train(dict(xgb_params, silent=0), dtrain, num_boost_round=num_boost_rounds)
 
 y_pred = model.predict(dtest)

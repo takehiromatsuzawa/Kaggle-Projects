@@ -1,22 +1,25 @@
-
+################################################################################################
+################################################################################################
+################################################################################################
 # Mostly a lot of silliness at this point:
-#   Main contribution (50%) is based on Reynaldo's script with a linear transformation of y_train
+#   First model is based on Reynaldo's script with a linear transformation of y_train
 #      that happens to fit the public test data well
 #      and may also fit the private test data well
 #      if it reflects a macro effect
 #      but almost certainly won't generalize to later data
-#   Second contribution (20%) is based on Bruno do Amaral's very early entry but
+#   Second model is based on Bruno do Amaral's very early entry but
 #      with an outlier that I deleted early in the competition
-#   Third contribution (30%) is based on a legitimate data cleaning,
+#   Third model is based on a legitimate data cleaning,
 #      probably by gunja agarwal (or actually by Jason Benner, it seems,
 #      but there's also a small transformation applied ot the predictions,
 #      so also probably not generalizable),
-#   This combo being run by Andy Harless on June 4
+################################################################################################
+################################################################################################
+################################################################################################
+
 
 import numpy as np
 import pandas as pd
-#import matplotlib.pyplot as plt
-#import seaborn as sns
 from sklearn import model_selection, preprocessing
 import xgboost as xgb
 import datetime
@@ -168,120 +171,89 @@ test['average_q_price'] = 1
 
 test_2016_q2_index = test.loc[test['timestamp'].dt.year == 2016].loc[test['timestamp'].dt.month >= 4].loc[test['timestamp'].dt.month <= 7].index
 test.loc[test_2016_q2_index, 'average_q_price'] = rate_2016_q2
-# test.loc[test_2016_q2_index, 'year_q'] = '2016_q2'
 
 test_2016_q1_index = test.loc[test['timestamp'].dt.year == 2016].loc[test['timestamp'].dt.month >= 1].loc[test['timestamp'].dt.month < 4].index
 test.loc[test_2016_q1_index, 'average_q_price'] = rate_2016_q1
-# test.loc[test_2016_q2_index, 'year_q'] = '2016_q1'
 
 test_2015_q4_index = test.loc[test['timestamp'].dt.year == 2015].loc[test['timestamp'].dt.month >= 10].loc[test['timestamp'].dt.month < 12].index
 test.loc[test_2015_q4_index, 'average_q_price'] = rate_2015_q4
-# test.loc[test_2015_q4_index, 'year_q'] = '2015_q4'
 
 test_2015_q3_index = test.loc[test['timestamp'].dt.year == 2015].loc[test['timestamp'].dt.month >= 7].loc[test['timestamp'].dt.month < 10].index
 test.loc[test_2015_q3_index, 'average_q_price'] = rate_2015_q3
-# test.loc[test_2015_q3_index, 'year_q'] = '2015_q3'
-
-# test_2015_q2_index = test.loc[test['timestamp'].dt.year == 2015].loc[test['timestamp'].dt.month >= 4].loc[test['timestamp'].dt.month < 7].index
-# test.loc[test_2015_q2_index, 'average_q_price'] = rate_2015_q2
-
-# test_2015_q1_index = test.loc[test['timestamp'].dt.year == 2015].loc[test['timestamp'].dt.month >= 4].loc[test['timestamp'].dt.month < 7].index
-# test.loc[test_2015_q1_index, 'average_q_price'] = rate_2015_q1
 
 
 # train 2015
 train['average_q_price'] = 1
 
 train_2015_q4_index = train.loc[train['timestamp'].dt.year == 2015].loc[train['timestamp'].dt.month >= 10].loc[train['timestamp'].dt.month <= 12].index
-# train.loc[train_2015_q4_index, 'price_doc'] = train.loc[train_2015_q4_index, 'price_doc'] * rate_2015_q4
 train.loc[train_2015_q4_index, 'average_q_price'] = rate_2015_q4
 
 train_2015_q3_index = train.loc[train['timestamp'].dt.year == 2015].loc[train['timestamp'].dt.month >= 7].loc[train['timestamp'].dt.month < 10].index
-#train.loc[train_2015_q3_index, 'price_doc'] = train.loc[train_2015_q3_index, 'price_doc'] * rate_2015_q3
 train.loc[train_2015_q3_index, 'average_q_price'] = rate_2015_q3
 
 train_2015_q2_index = train.loc[train['timestamp'].dt.year == 2015].loc[train['timestamp'].dt.month >= 4].loc[train['timestamp'].dt.month < 7].index
-#train.loc[train_2015_q2_index, 'price_doc'] = train.loc[train_2015_q2_index, 'price_doc'] * rate_2015_q2
 train.loc[train_2015_q2_index, 'average_q_price'] = rate_2015_q2
 
 train_2015_q1_index = train.loc[train['timestamp'].dt.year == 2015].loc[train['timestamp'].dt.month >= 1].loc[train['timestamp'].dt.month < 4].index
-#train.loc[train_2015_q1_index, 'price_doc'] = train.loc[train_2015_q1_index, 'price_doc'] * rate_2015_q1
 train.loc[train_2015_q1_index, 'average_q_price'] = rate_2015_q1
 
 
 # train 2014
 train_2014_q4_index = train.loc[train['timestamp'].dt.year == 2014].loc[train['timestamp'].dt.month >= 10].loc[train['timestamp'].dt.month <= 12].index
-#train.loc[train_2014_q4_index, 'price_doc'] = train.loc[train_2014_q4_index, 'price_doc'] * rate_2014_q4
 train.loc[train_2014_q4_index, 'average_q_price'] = rate_2014_q4
 
 train_2014_q3_index = train.loc[train['timestamp'].dt.year == 2014].loc[train['timestamp'].dt.month >= 7].loc[train['timestamp'].dt.month < 10].index
-#train.loc[train_2014_q3_index, 'price_doc'] = train.loc[train_2014_q3_index, 'price_doc'] * rate_2014_q3
 train.loc[train_2014_q3_index, 'average_q_price'] = rate_2014_q3
 
 train_2014_q2_index = train.loc[train['timestamp'].dt.year == 2014].loc[train['timestamp'].dt.month >= 4].loc[train['timestamp'].dt.month < 7].index
-#train.loc[train_2014_q2_index, 'price_doc'] = train.loc[train_2014_q2_index, 'price_doc'] * rate_2014_q2
 train.loc[train_2014_q2_index, 'average_q_price'] = rate_2014_q2
 
 train_2014_q1_index = train.loc[train['timestamp'].dt.year == 2014].loc[train['timestamp'].dt.month >= 1].loc[train['timestamp'].dt.month < 4].index
-#train.loc[train_2014_q1_index, 'price_doc'] = train.loc[train_2014_q1_index, 'price_doc'] * rate_2014_q1
 train.loc[train_2014_q1_index, 'average_q_price'] = rate_2014_q1
 
 
 # train 2013
 train_2013_q4_index = train.loc[train['timestamp'].dt.year == 2013].loc[train['timestamp'].dt.month >= 10].loc[train['timestamp'].dt.month <= 12].index
-# train.loc[train_2013_q4_index, 'price_doc'] = train.loc[train_2013_q4_index, 'price_doc'] * rate_2013_q4
 train.loc[train_2013_q4_index, 'average_q_price'] = rate_2013_q4
 
 train_2013_q3_index = train.loc[train['timestamp'].dt.year == 2013].loc[train['timestamp'].dt.month >= 7].loc[train['timestamp'].dt.month < 10].index
-# train.loc[train_2013_q3_index, 'price_doc'] = train.loc[train_2013_q3_index, 'price_doc'] * rate_2013_q3
 train.loc[train_2013_q3_index, 'average_q_price'] = rate_2013_q3
 
 train_2013_q2_index = train.loc[train['timestamp'].dt.year == 2013].loc[train['timestamp'].dt.month >= 4].loc[train['timestamp'].dt.month < 7].index
-# train.loc[train_2013_q2_index, 'price_doc'] = train.loc[train_2013_q2_index, 'price_doc'] * rate_2013_q2
 train.loc[train_2013_q2_index, 'average_q_price'] = rate_2013_q2
 
 train_2013_q1_index = train.loc[train['timestamp'].dt.year == 2013].loc[train['timestamp'].dt.month >= 1].loc[train['timestamp'].dt.month < 4].index
-# train.loc[train_2013_q1_index, 'price_doc'] = train.loc[train_2013_q1_index, 'price_doc'] * rate_2013_q1
 train.loc[train_2013_q1_index, 'average_q_price'] = rate_2013_q1
 
 
 # train 2012
 train_2012_q4_index = train.loc[train['timestamp'].dt.year == 2012].loc[train['timestamp'].dt.month >= 10].loc[train['timestamp'].dt.month <= 12].index
-# train.loc[train_2012_q4_index, 'price_doc'] = train.loc[train_2012_q4_index, 'price_doc'] * rate_2012_q4
 train.loc[train_2012_q4_index, 'average_q_price'] = rate_2012_q4
 
 train_2012_q3_index = train.loc[train['timestamp'].dt.year == 2012].loc[train['timestamp'].dt.month >= 7].loc[train['timestamp'].dt.month < 10].index
-# train.loc[train_2012_q3_index, 'price_doc'] = train.loc[train_2012_q3_index, 'price_doc'] * rate_2012_q3
 train.loc[train_2012_q3_index, 'average_q_price'] = rate_2012_q3
 
 train_2012_q2_index = train.loc[train['timestamp'].dt.year == 2012].loc[train['timestamp'].dt.month >= 4].loc[train['timestamp'].dt.month < 7].index
-# train.loc[train_2012_q2_index, 'price_doc'] = train.loc[train_2012_q2_index, 'price_doc'] * rate_2012_q2
 train.loc[train_2012_q2_index, 'average_q_price'] = rate_2012_q2
 
 train_2012_q1_index = train.loc[train['timestamp'].dt.year == 2012].loc[train['timestamp'].dt.month >= 1].loc[train['timestamp'].dt.month < 4].index
-# train.loc[train_2012_q1_index, 'price_doc'] = train.loc[train_2012_q1_index, 'price_doc'] * rate_2012_q1
 train.loc[train_2012_q1_index, 'average_q_price'] = rate_2012_q1
 
 
 # train 2011
 train_2011_q4_index = train.loc[train['timestamp'].dt.year == 2011].loc[train['timestamp'].dt.month >= 10].loc[train['timestamp'].dt.month <= 12].index
-# train.loc[train_2011_q4_index, 'price_doc'] = train.loc[train_2011_q4_index, 'price_doc'] * rate_2011_q4
 train.loc[train_2011_q4_index, 'average_q_price'] = rate_2011_q4
 
 train_2011_q3_index = train.loc[train['timestamp'].dt.year == 2011].loc[train['timestamp'].dt.month >= 7].loc[train['timestamp'].dt.month < 10].index
-# train.loc[train_2011_q3_index, 'price_doc'] = train.loc[train_2011_q3_index, 'price_doc'] * rate_2011_q3
 train.loc[train_2011_q3_index, 'average_q_price'] = rate_2011_q3
 
 train_2011_q2_index = train.loc[train['timestamp'].dt.year == 2011].loc[train['timestamp'].dt.month >= 4].loc[train['timestamp'].dt.month < 7].index
-# train.loc[train_2011_q2_index, 'price_doc'] = train.loc[train_2011_q2_index, 'price_doc'] * rate_2011_q2
 train.loc[train_2011_q2_index, 'average_q_price'] = rate_2011_q2
 
 train_2011_q1_index = train.loc[train['timestamp'].dt.year == 2011].loc[train['timestamp'].dt.month >= 1].loc[train['timestamp'].dt.month < 4].index
-# train.loc[train_2011_q1_index, 'price_doc'] = train.loc[train_2011_q1_index, 'price_doc'] * rate_2011_q1
 train.loc[train_2011_q1_index, 'average_q_price'] = rate_2011_q1
 
 train['price_doc'] = train['price_doc'] * train['average_q_price']
-# train.drop('average_q_price', axis=1, inplace=True)
 
 print('price changed done')
 
@@ -318,22 +290,14 @@ xgb_params = {
 dtrain = xgb.DMatrix(x_train, y_train)
 dtest = xgb.DMatrix(x_test)
 
-# cv_output = xgb.cv(xgb_params, dtrain, num_boost_round=1000, early_stopping_rounds=20,
-#     verbose_eval=20, show_stdv=False)
-#cv_output[['train-rmse-mean', 'test-rmse-mean']].plot()
-# cv_output = xgb.cv(xgb_params, dtrain, num_boost_round=1000, early_stopping_rounds=20, verbose_eval=25, show_stdv=False)
-# print('best num_boost_rounds = ', len(cv_output))
-# num_boost_rounds = len(cv_output) 
 
 print('Training 1st model...')
 num_boost_rounds = 422
 model = xgb.train(dict(xgb_params, silent=1), dtrain, num_boost_round=num_boost_rounds, verbose_eval=False)
 
-#fig, ax = plt.subplots(1, 1, figsize=(8, 13))
-#xgb.plot_importance(model, max_num_features=50, height=0.5, ax=ax)
 
 y_predict = model.predict(dtest)
-# y_predict = np.round(y_predict)
+
 gunja_output = pd.DataFrame({'id': id_test, 'price_doc': y_predict})
 sltrain1 =  pd.DataFrame({'id': id_train, 'mdl1': model.predict(dtrain)})
 print(sltrain1.shape)
@@ -375,12 +339,10 @@ xgb_params = {
 dtrain = xgb.DMatrix(x_train, y_train)
 dtest = xgb.DMatrix(x_test)
 
-# cv_output = xgb.cv(xgb_params, dtrain, num_boost_round=1000, early_stopping_rounds=20, verbose_eval=25, show_stdv=False)
-# print('best num_boost_rounds = ', len(cv_output))
-# num_boost_rounds = len(cv_output) # 382
+
 
 print('Training 2nd model...')
-num_boost_rounds = 391  # This was the CV output, as earlier version shows
+num_boost_rounds = 391  
 model = xgb.train(dict(xgb_params, silent=1), dtrain, num_boost_round=num_boost_rounds, verbose_eval=False)
 
 y_predict = model.predict(dtest)
@@ -503,11 +465,9 @@ xgb_params = {
 dtrain = xgb.DMatrix(X_train, y_train, feature_names=df_columns)
 dtest = xgb.DMatrix(X_test, feature_names=df_columns)
 
-# cv_output = xgb.cv(xgb_params, dtrain, num_boost_round=1000, early_stopping_rounds=20, verbose_eval=25, show_stdv=False)
-# print('best num_boost_rounds = ', len(cv_output))
-# num_boost_rounds = len(cv_output) #
+#
 print('Training 3rd model...')
-num_boost_rounds = 420  # From Bruno's original CV, I think
+num_boost_rounds = 420  
 model = xgb.train(dict(xgb_params, silent=1), dtrain, num_boost_round=num_boost_rounds, verbose_eval=False)
 
 y_pred = model.predict(dtest)
