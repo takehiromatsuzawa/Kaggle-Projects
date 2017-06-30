@@ -20,3 +20,5 @@ From Termainal on Mac,
 2. python3 second_script.py
 3. python3 third_script.py
 4. python3 fourth_script.py
+
+final_result.csv is the result.
