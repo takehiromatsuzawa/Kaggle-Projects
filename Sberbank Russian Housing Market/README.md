@@ -11,7 +11,7 @@ In this competition, Sberbank is challenging Kagglers to develop algorithms whic
 
 ## Result
 Developed algorithms to predict realty prices. Mainly used Stacked Modelings of Xgboost. 
-Won a bronze medal. 
+My result would've been top 6% in this competion if I had participated.
 
 ## How to Run 
 From Termainal on Mac,
