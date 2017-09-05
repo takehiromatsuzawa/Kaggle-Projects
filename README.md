@@ -1,4 +1,4 @@
-# kaggle_project
+# Kaggle Project
 
 All of My Kaggle Projects!
 
